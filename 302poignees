@@ -1,2 +1,108 @@
-#!/usr/bin/env bash
-python 302poignees.py $@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+
+import re
+import sys
+import copy
+
+def linked(content, base):
+    new = []
+    for elem in content:
+        if base == elem[0]: new.append(elem[1])
+        if base == elem[1]: new.append(elem[0])
+    return new
+
+def create_graph(content):
+    graph = {}
+    for elem in content:
+        if not elem[0] in graph: graph[elem[0]] = linked(content, elem[0])
+        if not elem[1] in graph: graph[elem[1]] = linked(content, elem[1])
+    return graph
+
+def create_list(content):
+    name_list = []
+    for elem in content:
+        if not elem[0] in name_list: name_list.append(elem[0])
+        if not elem[1] in name_list: name_list.append(elem[1])
+    name_list.sort()
+    return name_list
+
+def find_shortest_path(graph, base, target, path=[]):
+        path = path + [base]
+        if base == target: return path
+        if not graph.has_key(base): return None
+        short = None
+        for node in graph[base]:
+            if node not in path:
+                newpath = find_shortest_path(graph, node, target, path)
+                if newpath:
+                    if not short or len(newpath) < len(short):
+                        short = newpath
+        return short
+
+def matrix_simple(graph, name_list):
+    matrix = []
+    for base in name_list:
+        line = []
+        for target in name_list:
+            line.append(0) if not target in graph[base] else line.append(1)
+        matrix.append(line)
+    return matrix
+
+def matrix_depth(graph, name_list, depth_max):
+    matrix = []
+    for base in name_list:
+        line = []
+        for target in name_list:
+            depth = len(find_shortest_path(graph, base, target)) - 2
+            #if depth > depth_max or
+            line.append(0 if depth > depth_max or depth < 0 else depth)
+        matrix.append(line)
+    return matrix
+
+def print_matrix(matrix):
+    for line in matrix:
+        for elem in line:
+            sys.stdout.write(str(elem))
+        print
+
+def print_matrix_depth(matrix, maximum):
+    for line in matrix:
+        for elem in line:
+            if elem > maximum or elem < 0:
+                sys.stdout.write("0")
+            else:
+                 sys.stdout.write(str(elem))
+        print
+
+def print_length_option(graph, base, target):
+    path = find_shortest_path(graph, base, target)
+    print "degré de séparation entre",base,"et",target,":", -1 if not path else 0 if len(path) == 1 else len(path) - 2
+
+def print_matrix_option(content, graph, depth_max):
+    try:
+        depth_max = int(depth_max)
+    except:
+        exit(84)
+    name_list = create_list(content)
+    for name in name_list: print name
+    print
+    print_matrix(matrix_simple(graph, name_list))
+    print
+    print_matrix(matrix_depth(graph, name_list, depth_max))
+
+
+if len(sys.argv) <= 1 or len(sys.argv) > 4: exit(84)
+try:
+    with open(sys.argv[1]) as content_file:
+        try:
+            content = [x for x in re.split(" est ami avec | est amie avec |\n", content_file.read()) if x != '']
+            content = [content[x:x+2] for x in xrange(0, len(content), 2)]
+        except:
+            exit(84)
+except:
+    exit(84)
+
+graph = create_graph(content)
+if len(sys.argv) == 4: print_length_option(graph, sys.argv[2], sys.argv[3])
+if len(sys.argv) == 3: print_matrix_option(content, graph, sys.argv[2])
