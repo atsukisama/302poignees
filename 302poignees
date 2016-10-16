@@ -65,7 +65,7 @@ def matrix_depth(graph, name_list, depth_max):
 def print_matrix(matrix):
     for line in matrix:
         for elem in line:
-            sys.stdout.write(str(elem))
+            print elem,
         print
 
 def print_length_option(graph, base, target):
