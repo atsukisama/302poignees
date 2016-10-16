@@ -54,9 +54,11 @@ def matrix_depth(graph, name_list, depth_max):
     for base in name_list:
         line = []
         for target in name_list:
-            depth = len(find_shortest_path(graph, base, target)) - 2
-            #if depth > depth_max or
-            line.append(0 if depth > depth_max or depth < 0 else depth)
+            depth = len(find_shortest_path(graph, base, target)) - 1
+            if depth <= depth_max:
+                line.append(depth)
+            else:
+                line.append(0)
         matrix.append(line)
     return matrix
 
@@ -66,18 +68,9 @@ def print_matrix(matrix):
             sys.stdout.write(str(elem))
         print
 
-def print_matrix_depth(matrix, maximum):
-    for line in matrix:
-        for elem in line:
-            if elem > maximum or elem < 0:
-                sys.stdout.write("0")
-            else:
-                 sys.stdout.write(str(elem))
-        print
-
 def print_length_option(graph, base, target):
     path = find_shortest_path(graph, base, target)
-    print "degré de séparation entre",base,"et",target,":", -1 if not path else 0 if len(path) == 1 else len(path) - 2
+    print "degré de séparation entre",base,"et",target,":",-1 if path == None else len(path) - 1
 
 def print_matrix_option(content, graph, depth_max):
     try:
