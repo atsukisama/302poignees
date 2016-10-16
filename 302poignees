@@ -30,7 +30,7 @@ def create_list(content):
 def find_shortest_path(graph, base, target, path=[]):
         path = path + [base]
         if base == target: return path
-        if not graph.has_key(base): return None
+        if not base in graph: return None
         short = None
         for node in graph[base]:
             if node not in path:
